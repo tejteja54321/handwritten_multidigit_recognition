@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Handwritten Digit Recognition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+</head>
+<body style="background-color: #212529;">
+    
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark px-4">
+        <div class="container-fluid">
+            <!-- Left: Title -->
+            <span class="navbar-brand mb-0 h1">HandWritten Multi-Digits Recognition</span>
+
+            <!-- Right: Navigation Buttons -->
+            <div>
+                <a href="/" class="btn btn-outline-light me-2">Home</a>
+                <a href="/performance" class="btn btn-outline-light me-2">Performance</a>
+                <a href="/login" class="btn btn-outline-danger">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4 text-center">
+        <canvas id="canvas" width="680" height="450" style="border:2px solid white; background-color: black;"></canvas>
+        <br><br>
+        <button id="clear" class="btn btn-danger">Clear</button>
+        <button id="predict" class="btn btn-success">Predict</button>
+        <h2 class="text-white mt-3">Prediction: <span id="prediction"></span></h2>
+    </div>
+
+    <script>
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let drawing = false;
+    
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, 680, 450);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 8;
+        ctx.lineCap = "round";
+    
+        canvas.addEventListener("mousedown", (e) => {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+    
+        canvas.addEventListener("mouseup", () => {
+            drawing = false;
+        });
+    
+        canvas.addEventListener("mousemove", (e) => {
+            if (!drawing) return;
+            ctx.lineTo(e.offsetX, e.offsetY);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+    
+        document.getElementById("clear").addEventListener("click", () => {
+            ctx.fillRect(0, 0, 680, 450);
+            document.getElementById("prediction").innerText = "";
+        });
+    
+        document.getElementById("predict").addEventListener("click", () => {
+            let imageData = canvas.toDataURL();
+            $.ajax({
+                type: "POST",
+                url: "/predict",
+                data: { canvasimg: imageData },
+                success: function(response) {
+                    $("#prediction").text(response.prediction);
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
